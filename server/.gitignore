@@ -1,0 +1,58 @@
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ===============================
+# Virtual environments
+# ===============================
+.venv/
+.venv310/
+venv/
+
+# ===============================
+# Environment variables
+# ===============================
+.env
+.env.*
+
+# ===============================
+# Flask runtime storage
+# ===============================
+/uploads/*
+/encrypted_files/*
+/decrypted_files/*
+/keys/*
+temp.py
+
+# # Keep folders but ignore contents
+/uploads/.gitkeep
+/encrypted_files/.gitkeep
+/decrypted_files/.gitkeep
+
+# ===============================
+# Cryptographic keys (DO NOT COMMIT)
+# ===============================
+server/app/keys/*.pem
+!server/app/keys/.gitkeep
+
+# ===============================
+# Logs
+# ===============================
+*.log
+
+# ===============================
+# Node / React
+# ===============================
+node_modules/
+dist/
+build/
+
+# ===============================
+# OS junk
+# ===============================
+.DS_Store
+Thumbs.db

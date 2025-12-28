@@ -1,0 +1,4 @@
+server/app/storage/uploads/.gitkeep
+server/app/storage/encrypted_files/.gitkeep
+server/app/storage/decrypted_files/.gitkeep
+server/app/keys/.gitkeep
