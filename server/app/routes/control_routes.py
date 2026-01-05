@@ -36,18 +36,20 @@ def discover_receiver():
     if app_state.role != "SENDER":
         return jsonify({"error": "Not in sender mode"}), 403
 
-    ip, port = listen_for_receiver()
+    ip, port,name  = listen_for_receiver()
 
     if not ip:
         return jsonify({"error": "No receiver found"}), 404
-    print(f"Discovered receiver at {ip}:{port}")
+    print(f"Discovered receiver at {ip}:{port} with name {name}")
     app_state.receiver_ip = ip
     app_state.receiver_port = port
+    app_state.receiver_name = name
 
     return jsonify({
         "message": "Receiver discovered",
         "receiver_ip": ip,
-        "receiver_port": port
+        "receiver_port": port,
+        "receiver_name": name,
     })
 
 @control_bp.route("/receiver/start", methods=["POST"])
