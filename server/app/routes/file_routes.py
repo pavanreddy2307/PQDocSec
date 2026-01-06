@@ -71,8 +71,8 @@ def encrypt_file():
     result = encrypt_file_workflow(
         input_path=input_path,
         output_dir=current_app.config["ENCRYPTED_FOLDER"],
-        receiver_rsa_public_key=app_state.peer_rsa_public_key,
-        sender_signature_private_key=signature_private_key
+        rsa_public_key=app_state.peer_rsa_public_key,
+        signing_private_key=signature_private_key
     )
 
     # Delete original file after encryption

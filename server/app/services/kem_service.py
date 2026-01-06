@@ -1,7 +1,7 @@
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-
+from cryptography.hazmat.primitives import serialization
 
 def generate_rsa_keypair():
     """
@@ -16,10 +16,16 @@ def generate_rsa_keypair():
     return private_key, public_key
 
 
-def rsa_encrypt_key(aes_key, public_key):
+def rsa_encrypt_key(aes_key, public_key_pem):
     """
     Encrypts (wraps) AES key using RSA public key.
     """
+    if isinstance(public_key_pem, str):
+        public_key_pem = public_key_pem.encode('utf-8')
+    public_key = serialization.load_pem_public_key(
+        public_key_pem,
+        backend=default_backend()
+    )
     encrypted_key = public_key.encrypt(
         aes_key,
         padding.OAEP(

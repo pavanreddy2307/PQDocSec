@@ -1,5 +1,7 @@
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 
 def sign_hash(hash_bytes, private_key):
@@ -17,10 +19,15 @@ def sign_hash(hash_bytes, private_key):
     return signature
 
 
-def verify_signature(hash_bytes, signature, public_key):
+def verify_signature(hash_bytes, signature, public_key_pem):
     """
     Verifies RSA signature.
     """
+    if isinstance(public_key_pem, str):
+        public_key_pem = public_key_pem.encode('utf-8')
+    public_key = serialization.load_pem_public_key(
+        public_key_pem, 
+    )
     try:
         public_key.verify(
             signature,

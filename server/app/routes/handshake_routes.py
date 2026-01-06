@@ -199,9 +199,10 @@ def sender_ack_status():
 
     if state.ack_received:
         # 🔑 Store receiver's public keys from acknowledgment
+        print(state.receiver_info)
         if hasattr(state, 'receiver_info'):
             if 'rsa_public_key' in state.receiver_info:
-                app_state.peer_rsa_public_key = bytes.fromhex(state.receiver_info['rsa_public_key'])
+                app_state.peer_rsa_public_key =  state.receiver_info['rsa_public_key']
             if 'signature_public_key' in state.receiver_info:
                 app_state.peer_signature_public_key = bytes.fromhex(state.receiver_info['signature_public_key'])
         

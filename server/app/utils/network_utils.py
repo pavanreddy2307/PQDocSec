@@ -68,7 +68,8 @@ def listen_for_handshake(port, state, timeout=60):
                 state.sender_info = {
                     "ip": message["ip"],
                     "port": message["port"],
-                    "name": message["name"]
+                    "name": message["name"], 
+                    "signature_public_key": message["signature_public_key"]
                 }
                 state.handshake_received = True
                 state.should_stop = True  # Stop broadcasting
@@ -92,7 +93,7 @@ def send_handshake(receiver_ip, receiver_port, sender_ip, sender_port, sender_na
         "name": sender_name,
         "ip": sender_ip,
         "port": sender_port,
-        "public_key": sign_public_key.public_bytes(
+        "signature_public_key": sign_public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ).decode('utf-8')
@@ -140,7 +141,7 @@ def send_acknowledgment(sender_ip, sender_port, receiver_ip, receiver_port, rece
         "name": receiver_name,
         "ip": receiver_ip,
         "port": receiver_port,
-        "signature_public_key": rsa_public_key.public_bytes(
+        "rsa_public_key": rsa_public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ).decode('utf-8')
@@ -176,7 +177,8 @@ def listen_for_acknowledgment(port, state, timeout=30):
                 state.receiver_info = {
                     "ip": message["ip"],
                     "port": message["port"],
-                    "name": message["name"]
+                    "name": message["name"],
+                    "rsa_public_key": message["rsa_public_key"]
                 }
                 state.should_stop = True
                 break

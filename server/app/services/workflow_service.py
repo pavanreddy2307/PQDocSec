@@ -24,6 +24,7 @@ def encrypt_file_workflow(
 
     return {
         "encrypted_file_path": encrypted_path,
+        'aes_key': aes_key,
         "encrypted_aes_key": encrypted_aes_key,
         "file_hash": file_hash,
         "signature": signature
