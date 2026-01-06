@@ -109,16 +109,25 @@ def send_file():
     Sender backend → Receiver backend
     Sends encrypted file + encrypted AES key + signature
     """
+    data = request.get_json()
 
-    # REQUIRED FIELDS
-    encrypted_file_name = request.form.get("encrypted_file_name")
-    encrypted_aes_key = request.form.get("encrypted_aes_key")
-    signature = request.form.get("signature")
-    receiver_ip = request.form.get("receiver_ip")
-    receiver_port = request.form.get("receiver_port", "5050")
-    original_filename = request.form.get("original_filename", "received_file.pdf")
+    if not data:
+        return jsonify({"error": "Invalid JSON payload"}), 400
 
+    encrypted_file_name = data.get("encrypted_file_name")
+    receiver_ip = data.get("receiver_api")
+    # receiver_port = data.get("receiver_port", 5050)
+    original_filename = data.get("original_filename")
+
+    signature = data.get("signature")
+    encrypted_aes_key = data.get("encrypted_aes_key")
+    print("Sending file to receiver at:", receiver_ip)
+    print("Encrypted file name:", encrypted_file_name)
+    print("Encrypted AES key:", encrypted_aes_key)
+    print("Signature:", signature)
+    print("Original filename:", original_filename)
     if not all([encrypted_file_name, encrypted_aes_key, signature, receiver_ip]):
+        print("Missing required fields in send_file")
         return jsonify({"error": "Missing required fields"}), 400
 
     # FULL PATH TO ENCRYPTED FILE
@@ -147,7 +156,7 @@ def send_file():
             }
 
             response = requests.post(
-                f"http://{receiver_ip}:{receiver_port}/decrypt",
+                f"{receiver_ip}/decrypt",
                 files=files,
                 data=data,
                 timeout=15

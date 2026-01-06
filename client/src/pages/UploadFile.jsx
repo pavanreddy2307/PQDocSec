@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { localPost, peerPost } from "../services/api";
+import { PEER_API } from "../config/api";
 
 export default function UploadFile() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -131,17 +132,17 @@ export default function UploadFile() {
       try {
         // Just tell backend to send the file
         const payload = {
-          encrypted_file_name: encryptedFileName, // returned from /encrypt
-          receiver_ip: receiverIp,
-          receiver_port: receiverPort,
+          encrypted_file_name: encryptedFileName,
+          encrypted_aes_key: encryptedAesKey,
+          signature: signature, // returned from /encrypt
+          receiver_api:PEER_API ,
           original_filename: selectedFile.name
         };
-
-        const result = await peerPost(
+        console.log("Sending payload:", payload);
+        const result = await localPost(
           "/send-file",
-          JSON.stringify(payload),
+          payload,
           false,
-          { "Content-Type": "application/json" }
         );
 
         console.log("Send result:", result);
