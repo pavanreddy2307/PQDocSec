@@ -119,40 +119,37 @@ export default function UploadFile() {
     setError(null);
     setAnimationStep(0);
 
-    // Step 1: Show AES encryption
+    // Animation only (keep as-is)
     setTimeout(() => setAnimationStep(1), 500);
-    
-    // Step 2: Show RSA encapsulation of AES key
     setTimeout(() => setAnimationStep(2), 2500);
-    
-    // Step 3: Show hashing
     setTimeout(() => setAnimationStep(3), 4500);
-    
-    // Step 4: Show digital signature
     setTimeout(() => setAnimationStep(4), 6500);
-    
-    // Step 5: Show sending rocket
+
     setTimeout(async () => {
       setAnimationStep(5);
-      
+
       try {
-        const formData = new FormData();
-        
-        // Create a file object from encrypted file path (you'll need to handle this)
-        formData.append("encrypted_file", encryptedFile);
-        formData.append("encrypted_aes_key", encryptedAesKey);
-        formData.append("signature", signature);
-        formData.append("original_filename", selectedFile.name);
-        
-        const result = await peerPost("/decrypt", formData, true);
-        
-        console.log("File sent successfully:", result);
-        
-        // Navigate to success page
+        // Just tell backend to send the file
+        const payload = {
+          encrypted_file_name: encryptedFileName, // returned from /encrypt
+          receiver_ip: receiverIp,
+          receiver_port: receiverPort,
+          original_filename: selectedFile.name
+        };
+
+        const result = await peerPost(
+          "/send-file",
+          JSON.stringify(payload),
+          false,
+          { "Content-Type": "application/json" }
+        );
+
+        console.log("Send result:", result);
+
         setTimeout(() => {
           navigate("/filesent");
         }, 2000);
-        
+
       } catch (err) {
         console.error("Send failed:", err);
         setError("Failed to send file. Please try again.");
