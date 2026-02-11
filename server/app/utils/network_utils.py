@@ -59,20 +59,20 @@ def listen_for_handshake(port, state, timeout=60):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("", port))
     sock.settimeout(1)  # Short timeout for checking should_stop
-
+    
     start_time = time.time()
     
     while not state.should_stop and (time.time() - start_time) < timeout:
         try:
             data, addr = sock.recvfrom(4096)
             message = json.loads(data.decode())
-
+            print("Handshake message received:", message)
             if message.get("type") == "SENDER_HANDSHAKE":
                 state.sender_info = {
                     "ip": message["ip"],
                     "port": message["port"],
                     "name": message["name"], 
-                    "signature_public_key": message["signature_public_key"]
+                    "dilithium_public_key": message["dilithium_public_key"]
                 }
                 state.handshake_received = True
                 state.should_stop = True  # Stop broadcasting
@@ -185,7 +185,7 @@ def listen_for_acknowledgment(port, state, timeout=30):
                     "ip": message["ip"],
                     "port": message["port"],
                     "name": message["name"],
-                    "rsa_public_key": message["rsa_public_key"]
+                    "kyber_public_key": message["kyber_public_key"]
                 }
                 state.should_stop = True
                 break

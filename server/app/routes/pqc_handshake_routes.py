@@ -157,7 +157,7 @@ def receiver_acknowledge():
         "kyber_public_key": base64.b64encode(kyber_pk).decode("utf-8")
     }
 
-    success = send_acknowledgment(sender_ip, sender_port, payload)
+    success = send_acknowledgment(sender_ip, sender_port, receiver_ip, receiver_port, receiver_name)
 
     if not success:
         return jsonify({"error": "Failed to send acknowledgment"}), 500
