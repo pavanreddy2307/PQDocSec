@@ -4,6 +4,8 @@ import base64
 import requests
 from flask import Blueprint, request, jsonify, current_app
 from app.extensions import app_state
+import urllib.parse
+
 
 # PQC workflow services
 from app.services.pqc_workflow_service import (
@@ -55,14 +57,12 @@ def pqc_encrypt_file():
     # Read encrypted file → base64
     with open(result["encrypted_file_path"], "rb") as f:
         encrypted_b64 = base64.b64encode(f.read()).decode("utf-8")
-
+    print(encrypted_b64[:100] + "...")  # Print first 100 chars for debugging
     return jsonify({
         "message": "File encrypted using PQC",
         "encrypted_file": encrypted_b64,
         "encrypted_file_name": os.path.basename(result["encrypted_file_path"]),
-        "kyber_ciphertext": base64.b64encode(
-            result["kyber_ciphertext"]
-        ).decode("utf-8"),
+        "kyber_ciphertext": result["kyber_ciphertext"].hex(),
         "signature": base64.b64encode(
             result["signature"]
         ).decode("utf-8"),
@@ -86,13 +86,15 @@ def pqc_send_file():
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     receiver_api = data.get("receiver_api")
+    encrypted_file_b64 = data.get("encryptedFile")  # ← Changed: get base64 file from JSON
     encrypted_file_name = data.get("encrypted_file_name")
     signature = data.get("signature")
     kyber_ciphertext = data.get("kyber_ciphertext")
     original_filename = data.get("original_filename")
-
+    print("encrypted_file_b64 length:", len(encrypted_file_b64) if encrypted_file_b64 else "None")
     if not all([
         receiver_api,
+        encrypted_file_b64,  # ← Changed: check for base64 file
         encrypted_file_name,
         signature,
         kyber_ciphertext,
@@ -101,57 +103,68 @@ def pqc_send_file():
         print("Missing required fields in payload:", data)
         return jsonify({"error": "Missing required fields"}), 400
 
-    # Full path to encrypted file
-    encrypted_path = os.path.join(
-        current_app.config["ENCRYPTED_FOLDER"],
-        encrypted_file_name
-    )
-
-    if not os.path.exists(encrypted_path):
-        return jsonify({"error": "Encrypted file not found"}), 404
-
     try:
-        with open(encrypted_path, "rb") as f:
-            files = {
-                "file": (
-                    encrypted_file_name,
-                    f,
-                    "application/octet-stream"
-                )
-            }
-            
-            form_data = {
-                "signature": signature,
-                "kyber_ciphertext": kyber_ciphertext,
-                "original_filename": original_filename
-            }
-
-            response = requests.post(
-                f"{receiver_api}/pqc/decrypt",
-                files=files,
-                data=form_data,
-                timeout=20
+        # Decode base64 encrypted file to raw bytes
+        encrypted_file_bytes = base64.b64decode(encrypted_file_b64)
+        
+        # Prepare multipart form data
+        files = {
+            "file": (
+                encrypted_file_name,
+                encrypted_file_bytes,  # ← Raw bytes, not base64
+                "application/octet-stream"
             )
+        }
+        
+        form_data = {
+            "signature": signature,  # Keep as base64 string
+            "kyber_ciphertext": kyber_ciphertext,  # Keep as base64 string
+            "original_filename": original_filename
+        }
+
+        print(f"Sending to receiver: {receiver_api}/pqc/decrypt")
+        response = requests.post(
+            f"{receiver_api}/pqc/decrypt",
+            files=files,
+            data=form_data,
+            timeout=300
+        )
 
         # Forward receiver response to sender UI
         if response.status_code != 200:
+            print(f"Receiver error: {response.status_code} - {response.text}")
             return jsonify({
                 "error": "Receiver failed to decrypt",
                 "receiver_status": response.status_code,
                 "receiver_response": response.text
             }), 500
 
+        print("File sent and decrypted successfully")
         return jsonify({
             "message": "File sent successfully",
             "receiver_response": response.json()
         }), 200
 
+    except base64.binascii.Error as e:
+        print(f"Base64 decode error: {str(e)}")
+        return jsonify({
+            "error": "Invalid base64 encoding",
+            "details": str(e)
+        }), 400
+        
     except requests.exceptions.RequestException as e:
+        print(f"Request error: {str(e)}")
         return jsonify({
             "error": "Failed to contact receiver",
             "details": str(e)
         }), 500
-
+    
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return jsonify({
+            "error": "Internal server error",
+            "details": str(e)
+        }), 500
 
 # ======================================================
 # RECEIVER: Decrypt file using PQC
@@ -171,14 +184,18 @@ def pqc_decrypt_file():
         "original_filename", "received_file"
     )
 
+     # Print first 100 chars for debugging
     if not signature_b64 or not kyber_ct_b64:
+        print("Missing signature or Kyber ciphertext in form data")
         return jsonify({"error": "Missing signature or Kyber ciphertext"}), 400
 
     # Decode Base64 inputs
+    kyber_ct = bytes.fromhex(kyber_ct_b64)  # Kyber ciphertext is hex-encoded
     try:
         signature = base64.b64decode(signature_b64)
-        kyber_ct = base64.b64decode(kyber_ct_b64)
+        
     except Exception:
+        print("Invalid Base64 encoding for signature or Kyber ciphertext")
         return jsonify({"error": "Invalid Base64 encoding"}), 400
 
     # Save encrypted file exactly as received
@@ -196,17 +213,18 @@ def pqc_decrypt_file():
     # Store Kyber ciphertext for decapsulation
     kyber_ct_path = os.path.join(
         current_app.config["PQC_KEY_FOLDER"],
-        "kyber_ct.bin"
+        "sender_kyber_ct.bin"
     )
     with open(kyber_ct_path, "wb") as f:
         f.write(kyber_ct)
-
+    print(f"Kyber ciphertext stored for decapsulation at: {kyber_ct_path}")
     try:
         decrypted_path = pqc_decrypt_file_workflow(
             encrypted_file_path=encrypted_path,
             signature=signature,
             original_filename=original_filename
         )
+        print("File decrypted successfully")
         
         # Delete encrypted file after successful decryption
         os.remove(encrypted_path)

@@ -15,7 +15,7 @@ int main(void) {
     uint8_t ct[OQS_KEM_kyber_512_length_ciphertext];
 
     FILE *fsk = fopen("pqc_keys/kyber_sk.bin", "rb");
-    FILE *fct = fopen("pqc_keys/kyber_ct.bin", "rb");
+    FILE *fct = fopen("pqc_keys/sender_kyber_ct.bin", "rb");
 
     if (!fsk || !fct) {
         fprintf(stderr, "ERROR: Could not open Kyber input files\n");

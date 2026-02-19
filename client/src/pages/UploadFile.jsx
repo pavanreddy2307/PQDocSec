@@ -136,6 +136,7 @@ export default function UploadFile() {
         // Just tell backend to send the file
         const payload = {
           encrypted_file_name: encryptedFileName,
+          encryptedFile: encryptedFile, // base64 string
           encrypted_aes_key: encryptedAesKey,
           signature: signature, // returned from /encrypt
           receiver_api:PEER_API ,
