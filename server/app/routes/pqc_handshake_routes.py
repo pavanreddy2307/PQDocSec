@@ -118,6 +118,7 @@ def receiver_status():
     sender_info = state.sender_info
 
     # Store sender Dilithium public key
+    print(f"typer of sender_info['dilithium_public_key']: {type(sender_info['dilithium_public_key'])}")
     app_state.peer_dilithium_public_key = bytes.fromhex(sender_info["dilithium_public_key"])
     store_sender_dilithium_public_key(
         bytes.fromhex(sender_info["dilithium_public_key"])

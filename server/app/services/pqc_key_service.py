@@ -48,28 +48,28 @@ def load_dilithium_private_key() -> bytes:
 # 2️⃣ Store received public keys (handshake phase)
 # ======================================================
 
-def store_receiver_kyber_public_key(file_path: str):
+def store_sender_dilithium_public_key(pk_bytes: bytes):
     """
-    Sender stores receiver's Kyber public key
-    """
-    dest = os.path.join(
-        current_app.config["PQC_KEY_FOLDER"],
-        "receiver_kyber_pk.bin"
-    )
-    shutil.copy(file_path, dest)
-
-
-def store_sender_dilithium_public_key(file_path: str):
-    """
-    Receiver stores sender's Dilithium public key
+    Receiver stores sender's Dilithium public key as raw bytes
     """
     dest = os.path.join(
         current_app.config["PQC_KEY_FOLDER"],
         "sender_dilithium_pk.bin"
     )
-    shutil.copy(file_path, dest)
+    with open(dest, "wb") as f:
+        f.write(pk_bytes)
 
 
+def store_receiver_kyber_public_key(pk_bytes: bytes):
+    """
+    Sender stores receiver's Kyber public key as raw bytes
+    """
+    dest = os.path.join(
+        current_app.config["PQC_KEY_FOLDER"],
+        "receiver_kyber_pk.bin"
+    )
+    with open(dest, "wb") as f:
+        f.write(pk_bytes)
 # ======================================================
 # 3️⃣ Sender side: Kyber encapsulation
 # ======================================================
