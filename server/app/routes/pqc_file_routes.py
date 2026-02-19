@@ -15,6 +15,8 @@ from app.services.pqc_workflow_service import (
 
 # Key storage helpers (used during handshake elsewhere)
 from app.services.pqc_key_service import (
+    load_kyber_private_key,
+    load_kyber_public_key,
     store_receiver_kyber_public_key,
     store_sender_dilithium_public_key
 )
@@ -57,12 +59,22 @@ def pqc_encrypt_file():
     # Read encrypted file → base64
     with open(result["encrypted_file_path"], "rb") as f:
         encrypted_b64 = base64.b64encode(f.read()).decode("utf-8")
+    kyber_pk_path = os.path.join(
+        current_app.config["PQC_KEY_FOLDER"],
+        "receiver_kyber_pk.bin"
+    )
+
+    with open(kyber_pk_path, "rb") as f:
+        kyber_pk_bytes = f.read()
     print(encrypted_b64[:100] + "...")  # Print first 100 chars for debugging
     return jsonify({
         "message": "File encrypted using PQC",
         "encrypted_file": encrypted_b64,
+        "kyber_public_key": kyber_pk_bytes.hex(),
         "encrypted_file_name": os.path.basename(result["encrypted_file_path"]),
         "kyber_ciphertext": result["kyber_ciphertext"].hex(),
+        "shared_secret": result["shared_secret"].hex(),
+        "file_hash": result["file_hash"].hex(),
         "signature": base64.b64encode(
             result["signature"]
         ).decode("utf-8"),
@@ -235,10 +247,12 @@ def pqc_decrypt_file():
         return jsonify({"error": str(e)}), 400
 
     # Read decrypted file for queue storage
-    with open(decrypted_path, "rb") as f:
-        decrypted_b64 = base64.b64encode(f.read()).decode("utf-8")
+    # with open(decrypted_path, "rb") as f:
+    # # `decrypted_b64 = base64.b64encode(f.read()).decode("utf-8")` is encoding the contents of the
+    # decrypted file read from the file object `f` into base64 format.
+    # decrypted_b64 = base64.b64encode(f.read()).decode("utf-8")
     
-    file_size = os.path.getsize(decrypted_path)
+    # file_size = os.path.getsize(decrypted_path)
     file_id = str(uuid.uuid4())
 
     # Initialize queue if not exists
@@ -251,9 +265,10 @@ def pqc_decrypt_file():
         "filename": original_filename,
         "kyber_ciphertext": kyber_ct_b64,
         "signature": signature_b64,
-        "decrypted_file": decrypted_b64,
-        "file_size": file_size,
-        "path": decrypted_path,
+        "kyber_private_key": load_kyber_private_key().hex(),
+        "shared_secret": decrypted_path.get("shared_secret", "").hex(),
+        "file_hash": decrypted_path.get("file_hash", "").hex(),
+        "path": decrypted_path["decrypted_file_path"],
         "status": "READY"
     })
 
@@ -289,8 +304,9 @@ def pqc_next_file():
     return jsonify({
         "id": file_entry["id"],
         "filename": file_entry["filename"],
-        "file_data": file_entry["decrypted_file"],
-        "file_size": file_entry["file_size"],
         "kyber_ciphertext": file_entry["kyber_ciphertext"],
-        "signature": file_entry["signature"]
+        "signature": file_entry["signature"],
+        "file_hash": file_entry.get("file_hash"),
+        "shared_secret": file_entry.get("shared_secret"),
+        "kyber_private_key": file_entry.get("kyber_private_key")
     }), 200

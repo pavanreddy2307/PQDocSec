@@ -68,6 +68,7 @@ def pqc_encrypt_file_workflow(input_path: str):
     return {
         "encrypted_file_path": encrypted_path,
         "kyber_ciphertext": kyber_ct,
+        "shared_secret": shared_secret,
         "file_hash": file_hash,
         "signature": signature
     }
@@ -113,4 +114,11 @@ def pqc_decrypt_file_workflow(
         original_filename
     )
 
-    return decrypted_path
+    return {
+        "decrypted_file_path": decrypted_path,
+        "file_hash": file_hash,
+        "shared_secret": shared_secret,
+        "signature_verified": True,
+        "original_filename": original_filename,
+        # This can be added if needed for debugging       
+    }
