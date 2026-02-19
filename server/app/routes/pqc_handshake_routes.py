@@ -116,13 +116,12 @@ def receiver_status():
         return jsonify({"status": "WAITING"})
 
     sender_info = state.sender_info
+    print("Handshake received from sender:", sender_info)
 
     # Store sender Dilithium public key
     print(f"typer of sender_info['dilithium_public_key']: {type(sender_info['dilithium_public_key'])}")
     app_state.peer_dilithium_public_key = bytes.fromhex(sender_info["dilithium_public_key"])
-    store_sender_dilithium_public_key(
-        bytes.fromhex(sender_info["dilithium_public_key"])
-    )
+    store_sender_dilithium_public_key(bytes.fromhex(sender_info["dilithium_public_key"]))
 
     return jsonify({
         "status": "READY",
@@ -199,7 +198,8 @@ def sender_handshake():
     sender_port = 5051
 
     dilithium_pk = load_dilithium_public_key()
-
+    print(f"type of dilithium_pk: {type(dilithium_pk)}, length: {len(dilithium_pk)} bytes")
+    print(f"type(dilithium_pk.hex()): {type(dilithium_pk.hex())}, length: {len(dilithium_pk.hex())} chars")
     payload = {
         "type": "SENDER_HANDSHAKE",
         "name": sender_name,
@@ -207,7 +207,7 @@ def sender_handshake():
         "port": sender_port,
         "dilithium_public_key": dilithium_pk.hex()
     }
-    print("Prepared handshake payload:", payload)
+    # print("Prepared handshake payload:", payload)
     success = send_handshake(receiver_ip, receiver_port, sender_ip, sender_port, sender_name)
 
     if not success:

@@ -4,7 +4,7 @@ import time
 import threading
 from app.services.pqc_key_service import load_dilithium_public_key
 from app.services.pqc_key_service import load_kyber_public_key
-from app.utils.helpers import bin_to_b64
+# from app.utils.helpers import bin_to_b64
 from app.services.key_service import load_signature_public_key, load_rsa_public_key
 from cryptography.hazmat.primitives import serialization
 
@@ -101,7 +101,7 @@ def send_handshake(receiver_ip, receiver_port, sender_ip, sender_port, sender_na
         #     encoding=serialization.Encoding.PEM,
         #     format=serialization.PublicFormat.SubjectPublicKeyInfo
         # ).decode('utf-8')
-        "dilithium_public_key": bin_to_b64(dilithium_pk)
+        "dilithium_public_key": dilithium_pk.hex()
     }
     print("Sending handshake payload:", payload)
 
@@ -151,7 +151,7 @@ def send_acknowledgment(sender_ip, sender_port, receiver_ip, receiver_port, rece
         #     encoding=serialization.Encoding.PEM,
         #     format=serialization.PublicFormat.SubjectPublicKeyInfo
         # ).decode('utf-8')
-        "kyber_public_key": bin_to_b64(kyber_pk)
+        "kyber_public_key": kyber_pk.hex()
     }
 
     print("sending",sender_ip, sender_port, "acknowledgment with payload:", payload)
