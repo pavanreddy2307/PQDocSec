@@ -88,14 +88,14 @@ def sender_generate_shared_secret_and_ciphertext():
     
     if not os.path.exists(kyber_encaps_bin):
         raise FileNotFoundError("kyber_encaps binary not found")
-    print("Running kyber_encaps binary")
+    # print("Running kyber_encaps binary")
     subprocess.run([kyber_encaps_bin], check=True)
     
     shared_secret_path = os.path.join(
         current_app.config["PQC_KEY_FOLDER"],
         "shared_secret_sender.bin"
     )
-    print("Shared secret and Kyber ciphertext generated")
+    # print("Shared secret and Kyber ciphertext generated")
 
     ciphertext_path = os.path.join(
         current_app.config["PQC_KEY_FOLDER"],

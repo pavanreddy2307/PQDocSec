@@ -116,10 +116,14 @@ def receiver_status():
         return jsonify({"status": "WAITING"})
 
     sender_info = state.sender_info
-    print("Handshake received from sender:", sender_info)
+    # The line `print("Handshake received from sender:", sender_info)` is printing a message along
+    # with the `sender_info` variable when the handshake is received from the sender. This is helpful
+    # for debugging and monitoring the communication flow between the sender and receiver during the
+    # PQC (Post-Quantum Cryptography) handshake process.
+    # print("Handshake received from sender:", sender_info)
 
     # Store sender Dilithium public key
-    print(f"typer of sender_info['dilithium_public_key']: {type(sender_info['dilithium_public_key'])}")
+    # print(f"typer of sender_info['dilithium_public_key']: {type(sender_info['dilithium_public_key'])}")
     app_state.peer_dilithium_public_key = bytes.fromhex(sender_info["dilithium_public_key"])
     store_sender_dilithium_public_key(bytes.fromhex(sender_info["dilithium_public_key"]))
 
@@ -190,7 +194,7 @@ def sender_handshake():
     receiver_ip = data.get("receiver_ip")
     receiver_port = data.get("receiver_port", 5050)
     sender_name = data.get("sender_name", "Sender")
-    print(f"Received handshake request for receiver {receiver_ip}:{receiver_port}")
+    # print(f"Received handshake request for receiver {receiver_ip}:{receiver_port}")
     if not receiver_ip:
         return jsonify({"error": "Receiver IP required"}), 400
 
@@ -198,8 +202,8 @@ def sender_handshake():
     sender_port = 5051
 
     dilithium_pk = load_dilithium_public_key()
-    print(f"type of dilithium_pk: {type(dilithium_pk)}, length: {len(dilithium_pk)} bytes")
-    print(f"type(dilithium_pk.hex()): {type(dilithium_pk.hex())}, length: {len(dilithium_pk.hex())} chars")
+    # print(f"type of dilithium_pk: {type(dilithium_pk)}, length: {len(dilithium_pk)} bytes")
+    # print(f"type(dilithium_pk.hex()): {type(dilithium_pk.hex())}, length: {len(dilithium_pk.hex())} chars")
     payload = {
         "type": "SENDER_HANDSHAKE",
         "name": sender_name,

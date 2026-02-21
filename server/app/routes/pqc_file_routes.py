@@ -103,7 +103,7 @@ def pqc_send_file():
     signature = data.get("signature")
     kyber_ciphertext = data.get("kyber_ciphertext")
     original_filename = data.get("original_filename")
-    print("encrypted_file_b64 length:", len(encrypted_file_b64) if encrypted_file_b64 else "None")
+    # print("encrypted_file_b64 length:", len(encrypted_file_b64) if encrypted_file_b64 else "None")
     if not all([
         receiver_api,
         encrypted_file_b64,  # ← Changed: check for base64 file
@@ -134,7 +134,7 @@ def pqc_send_file():
             "original_filename": original_filename
         }
 
-        print(f"Sending to receiver: {receiver_api}/pqc/decrypt")
+        # print(f"Sending to receiver: {receiver_api}/pqc/decrypt")
         response = requests.post(
             f"{receiver_api}/pqc/decrypt",
             files=files,
@@ -151,7 +151,7 @@ def pqc_send_file():
                 "receiver_response": response.text
             }), 500
 
-        print("File sent and decrypted successfully")
+        # print("File sent and decrypted successfully")
         return jsonify({
             "message": "File sent successfully",
             "receiver_response": response.json()
@@ -200,10 +200,10 @@ def pqc_decrypt_file():
     if not signature_b64 or not kyber_ct_b64:
         print("Missing signature or Kyber ciphertext in form data")
         return jsonify({"error": "Missing signature or Kyber ciphertext"}), 400
-    print(f"kyber_ct_b64: {kyber_ct_b64[:100]}...")  # Print first 100 chars for debugging
+    # print(f"kyber_ct_b64: {kyber_ct_b64[:100]}...")  # Print first 100 chars for debugging
     # Decode Base64 inputs
     kyber_ct = bytes.fromhex(kyber_ct_b64)  
-    print(f"Kyber ciphertext length: {len(kyber_ct)} bytes")
+    # print(f"Kyber ciphertext length: {len(kyber_ct)} bytes")
     try:
         signature = base64.b64decode(signature_b64)
         
@@ -230,7 +230,7 @@ def pqc_decrypt_file():
     )
     with open(kyber_ct_path, "wb") as f:
         f.write(kyber_ct)
-    print(f"Kyber ciphertext stored for decapsulation at: {kyber_ct_path}")
+    # print(f"Kyber ciphertext stored for decapsulation at: {kyber_ct_path}")
     try:
         decrypted_path = pqc_decrypt_file_workflow(
             encrypted_file_path=encrypted_path,
