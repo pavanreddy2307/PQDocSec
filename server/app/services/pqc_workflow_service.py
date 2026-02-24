@@ -94,9 +94,9 @@ def pqc_encrypt_file_workflow(input_path: str):
         "file_name": os.path.basename(input_path),
         "key_encapsulation": (kyber_end - kyber_start) / 1e6,  # ms
         "derive_key": (derive_end - derive_start) / 1e6,       # ms
-        "AES_encryption": (aes_end - aes_start) / 1e6,
+        "AES_encrypt": (aes_end - aes_start) / 1e6,
         "Hash_generation": (hash_end - hash_start) / 1e6,
-        "Sign_hash": (sign_end - sign_start) / 1e6              # ms
+        "Sign_generation": (sign_end - sign_start) / 1e6              # ms
     }
     response = supabase.table("post-quantum encryption").insert(data).execute()
 
@@ -175,7 +175,7 @@ def pqc_decrypt_file_workflow(
         "file_name": original_filename,
         "Hash_generation": (hash_end - hash_start) / 1e6,          # ms
         "Verify_signature": (verify_end - verify_start) / 1e6,     # ms
-        "key_encapsulation": (kyber_end - kyber_start) / 1e6,
+        "key_ecapsulation": (kyber_end - kyber_start) / 1e6,
         "derive_key": (derive_end - derive_start) / 1e6,       # ms
         "AES_decryption": (aes_end - aes_start) / 1e6              # ms
     }
