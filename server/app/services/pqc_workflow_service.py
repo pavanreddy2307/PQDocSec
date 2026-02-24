@@ -98,10 +98,10 @@ def pqc_encrypt_file_workflow(input_path: str):
         "Hash_generation": (hash_end - hash_start) / 1e6,
         "Sign_generation": (sign_end - sign_start) / 1e6              # ms
     }
-    response = supabase.table("post-quantum encryption").insert(data).execute()
+#     response = supabase.table("post-quantum encryption").insert(data).execute()
 
-# Optional debug
-    print("Supabase insert response:", response)
+# # Optional debug
+#     print("Supabase insert response:", response)
 
     return {
         "encrypted_file_path": encrypted_path,
@@ -180,10 +180,10 @@ def pqc_decrypt_file_workflow(
         "AES_decryption": (aes_end - aes_start) / 1e6              # ms
     }
 
-    response = supabase.table("post-quantum decryption").insert(data).execute()
+#     response = supabase.table("post-quantum decryption").insert(data).execute()
 
-# Optional debug
-    print("Supabase insert response:", response)
+# # Optional debug
+#     print("Supabase insert response:", response)
     return {
         "decrypted_file_path": decrypted_path,
         "file_hash": file_hash,
